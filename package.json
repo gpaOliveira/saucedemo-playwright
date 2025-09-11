@@ -1,0 +1,35 @@
+{
+  "name": "saucedemo-playwright",
+  "version": "1.0.0",
+  "scripts": {
+    "open": "npx playwright codegen $(awk -F'[\"=]' '/SAUCEDEMO_BASE_URL/ {print $3}' .env)",
+    "clean": "rm -rf tests-out/ && rm -rf test-results/ && rm -rf playwright-report/",
+    "type-check": "npx tsc --project tsconfig.json --noEmit",
+    "check": "npx eslint && npm run type-check",
+    "compile": "npm run clean && npm run check && npx tsc --incremental --project tsconfig.json --outDir tests-out && cp .env tests-out/",
+    "test": "npm run compile && npx playwright test $spec -c tests-out",
+    "debug": "npm run compile && npx playwright test $spec --debug -c tests-out",
+    "screenshot": "npm run compile && npx playwright test $spec --update-snapshots -c tests-out"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gpaOliveira/saucedemo-playwright.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gpaOliveira/saucedemo-playwright/issues"
+  },
+  "homepage": "https://github.com/gpaOliveira/saucedemo-playwright#README",
+  "dependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.43.0",
+    "@typescript-eslint/parser": "^8.43.0",
+    "@typescript-eslint/utils": "^8.43.0",
+    "dotenv": "^17.2.2",
+    "eslint": "^9.35.0",
+    "eslint-plugin-playwright": "^2.2.2",
+    "jiti": "^2.5.1",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.43.0"
+  }
+}
