@@ -1,7 +1,7 @@
-import { test as baseTest } from '@playwright/test';
-import { TestInfoPage } from '../pages/common/TestInfoPage';
-import { AuthenticatePage } from '../pages/common/AuthenticatePage';
-import { StepController } from '../pages/common/StepController';
+import { mergeTests } from '@playwright/test';
+import { test as authenticatePageFixture } from '../pages/common/AuthenticatePage';
+import { test as stepControllerFixture } from '../pages/common/StepController';
+import { test as productsPageFixture} from '../pages/common/ProductsPage';
 
 /*
 We extend Playwright test to add our Pages as fixtures and reuse that logic, so the
@@ -10,21 +10,11 @@ tests can decide which ones to use in their declaration.
 For more details about this approach, see https://playwright.dev/docs/test-fixtures
 */
 
-const test = baseTest.extend<{
-  testInfoPage: TestInfoPage;
-  authenticatePage: AuthenticatePage;
-  step: StepController;
-}>({
-  step: async ({ page, context, testInfoPage }, use) => {
-    await use(new StepController(page, context, testInfoPage));
-  },
-  testInfoPage: async ({}, use, testInfo) => {
-    await use(new TestInfoPage(testInfo));
-  },
-  authenticatePage: async ({ page, context }, use) => {
-    await use(new AuthenticatePage(page, context));
-  },
-});
+const test = mergeTests(
+  authenticatePageFixture,
+  productsPageFixture,
+  stepControllerFixture
+);
 
 test.beforeEach(async ({ testInfoPage }) => {
   testInfoPage.addStdoutTitle('Before test');

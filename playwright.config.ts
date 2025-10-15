@@ -17,6 +17,8 @@ if (dotenvResult.error) {
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
+const authFile = path.join(__dirname, 'playwright/.auth/user.json');
+
 export default defineConfig({
   testDir: './tests',
   /* Maximum time one test can run for. */
@@ -54,7 +56,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
-    actionTimeout: 8000,
+    actionTimeout: 3000,
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: process.env.SAUCEDEMO_BASE_URL,
 
@@ -81,15 +83,19 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    // Setup project
+  { name: 'setup', testMatch: /auth\.*/ },
     {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
+        storageState: authFile,
         launchOptions: {
           args: ['--allow-insecure-localhost', '--disable-ssl-false-start'],
         },
         //viewport: { width: 1280, height: 1024 },
       },
+      dependencies: ['setup'], // Ensure setup runs before authenticated tests
     },
   ],
 

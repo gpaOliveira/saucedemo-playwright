@@ -1,13 +1,17 @@
 // @ts-check
 import { TestInfoPage } from './TestInfoPage';
-import { BrowserContext, Page, test, expect } from '@playwright/test';
+import { BrowserContext, Page, test as baseTest, expect } from '@playwright/test';
 
 /*
  * StepController supports the reporting of information before/after each test step - a feature missing
  * in Playwright at the moment.
  *
+ * Before each step, we:
+ * - attach the current page screenshot to the HTML report
+ * - add a line to stdout (which is also part of Playwright HTML report)
+ *
  * After each step, we:
- * - attach the current page screenshot
+ * - attach the current page screenshot to the HTML report
  * - add a line to stdout (which is also part of Playwright HTML report)
  */
 export class StepController {
@@ -29,8 +33,10 @@ export class StepController {
         await this.attachScreenshot('Before step - ' + title);
         await target.call(this);
         await this.testInfoPage.addStdout('After step - ' + title);
+        await this.attachScreenshot('After step - ' + title);
         this.testInfoPage.addStdoutDivisor();
       },
+      // boxedStep needs that so error messages are shown nicely
       { box: true }
     );
   }
@@ -39,3 +45,15 @@ export class StepController {
     await expect(page).toHaveScreenshot();
   }
 }
+
+export const test = baseTest.extend<{
+  testInfoPage: TestInfoPage;
+  step: StepController;
+}>({
+  step: async ({ page, context, testInfoPage }, use) => {
+    await use(new StepController(page, context, testInfoPage));
+  },
+  testInfoPage: async ({}, use, testInfo) => {
+    await use(new TestInfoPage(testInfo));
+  }
+});
