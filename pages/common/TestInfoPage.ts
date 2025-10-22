@@ -25,5 +25,4 @@ export class TestInfoPage {
   async attachScreenshot(title: string, body: string | Buffer | undefined) {
     await this.testInfo.attach(title, { body, contentType: 'image/png' });
   }
-
 }
