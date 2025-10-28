@@ -7,10 +7,19 @@
       "resolveJsonModule": true,
       "moduleResolution": "nodenext",
       "sourceMap": true,
-      /*For typescript-json-serializer*/
       "emitDecoratorMetadata": true,
       "experimentalDecorators": true,
       /*Re-map imports */
-      "paths": {}
-    }
+      "paths": {
+        "@common/*": ["./pages/common/*"],
+        "@authentication/*": ["./pages/authentication/*"],
+        "@pages/*": ["./pages/*"]
+      }
+    },
+    /*Make sure to include JSON files like pages/authentication/authenticate_data.json */
+    "include": [
+      "**/*",
+      ".env",
+      "**/*.json"
+    ]
   }

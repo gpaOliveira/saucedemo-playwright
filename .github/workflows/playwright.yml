@@ -5,9 +5,10 @@ on:
   pull_request:
     branches: [ main, master ]
 jobs:
-  test:
+  run-tests:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    environment: dev
     steps:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
@@ -17,11 +18,40 @@ jobs:
       run: npm ci
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps
+    - name: Create and populate .env file
+      run: |
+        echo "SAUCEDEMO_BASE_URL=${{ vars.SAUCEDEMO_BASE_URL }}" >> .env
     - name: Run Playwright tests
-      run: npx playwright test
+      run: npm run test # Using npm run to call our run test script that lint and compile it all
     - uses: actions/upload-artifact@v4
-      if: ${{ !cancelled() }}
+      if: ${{ always() }} # Run even if previous step exit with -1
       with:
         name: playwright-report
-        path: playwright-report/
+        path: tests-out/playwright-report/
         retention-days: 30
+
+  publish-report:
+    needs: run-tests
+    if: ${{ always() }} # Run even if run-tests fails
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download Playwright Report
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: playwright-report/
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
