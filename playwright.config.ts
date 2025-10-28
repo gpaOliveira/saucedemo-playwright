@@ -17,7 +17,8 @@ if (dotenvResult.error) {
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
-const authFile = path.join(__dirname, 'playwright/.auth/user.json');
+import { defaultUserSessionFilename } from './pages/authentication/AuthenticateData';
+const authFile = path.join(__dirname, defaultUserSessionFilename());
 
 export default defineConfig({
   testDir: './tests',
@@ -57,7 +58,11 @@ export default defineConfig({
   use: {
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 3000,
-    /* Base URL to use in actions like `await page.goto('/')`. */
+
+    /*
+    Base URL to use in actions like `await page.goto('/')`.
+    Coming from an environment variable so we can change it per environment if needed
+    */
     baseURL: process.env.SAUCEDEMO_BASE_URL,
 
     headless: true,

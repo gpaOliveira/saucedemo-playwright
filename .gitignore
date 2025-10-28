@@ -1,5 +1,6 @@
 
 .env
+.auth/
 # Playwright
 node_modules/
 /tests-out/

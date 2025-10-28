@@ -1,7 +1,7 @@
 import { mergeTests } from '@playwright/test';
-import { test as authenticatePageFixture } from '../pages/common/AuthenticatePage';
-import { test as stepControllerFixture } from '../pages/common/StepController';
-import { test as productsPageFixture} from '../pages/common/ProductsPage';
+import { test as authenticatePageFixture } from '@authentication/AuthenticatePage';
+import { test as stepControllerFixture } from '@common/StepController';
+import { test as productsPageFixture} from '@pages/ProductsPage';
 
 /*
 We extend Playwright test to add our Pages as fixtures and reuse that logic, so the

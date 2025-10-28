@@ -34,7 +34,9 @@ Since adding tests alone would be simplistic, some other features were added.
 
 Depending on the project needs, one may want to use a particular TS Config when you are using experimental or very recent features of TypeScript.
 
-For such cases the recommendation is to [manually compile the tests](https://playwright.dev/docs/test-typescript#manually-compile-tests-with-typescript)
+For such cases the recommendation is to [manually compile the tests TS files](https://playwright.dev/docs/test-typescript#manually-compile-tests-with-typescript). When doing that, is important to also copy over JSON files (see how we added a `include` on `./tsconfig.json`) and the `.env` file (which we `cp` manually).
+
+For such cases, the `npm run test` and `npm run debug` and `npm run screenshot` are already all reading from where the compiled code goes (a folder named `tests-out`).
 
 ### Linting
 
@@ -42,11 +44,36 @@ ESLinting can be used with playwright to help us not forget about removing pesky
 
 This is run automatically when tests are run, so no special pipeline stage is needed for it.
 
+### Test Steps
+
+Whenever a test starts to have multiple code lines it may be interesting to separate then in blocks that achieve a certain goal - for example, a block to perform a login, or to sort elements in the screen, or to see an item details.
+
+For those cases, one can group such code lines into a step. By using the `step` fixture, one can create a test as follows:
+
+```ts
+test('My test', async ({ step }) => {
+
+    await step.in('<step one>', async () => {
+        ....
+    });
+
+    await step.in('<step two>', async () => {
+        ....
+    });
+});
+```
+
+Moreover, having such `step.in` method allow us to execute some code before or after *every* step. For now, we take screenshots (see below) and add them to the HTML report, but maybe you'd like to borrow the idea and cleanup our backend or grab some logs.
+
+Alternatively, one could argue that instead of grouping many code lines in a test (and in a step), we could have a broader page object calling other page objects. While this is indeed a viable alternative, such code indirection may confuse some people (especially if one have to jump through many methods until finding a selector they're interested in). Besides, if you do that, you also lose the ability to execute some code before or after *every* block of code.
+
 ### Snapshots
 
 Screnshots (or snapshots) are helpful to detect color changes or missing images, so some of our tests have. They are saved locally in a [versioned controlled folder](tests/snapshots/) for ease of maintenance.
 
 See [the docs](https://playwright.dev/docs/screenshots) for details.
+
+As seen above, we use `step.in` on our tests. Therefore, at the end of every step, we put an automatic `await this.expectScreenshot()`, so one doesn't have to do it directly on the test file if they don't want. Remember this when writing your steps :)
 
 ### Github Actions
 
@@ -60,8 +87,6 @@ We use [dotenv](https://www.npmjs.com/package/dotenv) to load a `.env` file on r
 
 ```bash
 SAUCEDEMO_BASE_URL="https://www.saucedemo.com/v1"
-SAUCEDEMO_STD_USER="standard_user"
-SAUCEDEMO_STD_PASS="check their page"
 ```
 
 These are also configured on Github project, so make sure to add there extra keys if you need them.
@@ -88,3 +113,13 @@ Future ones include (may all become folders, will decide when I get there):
 - **checkout.spec.ts**: meant for tests performing the checkout of a single product and then checkout
 - **checkout.multiple.spec.ts**: meant for tests performing the checkout of lots of products (in the products page) and then check the cart number and then checkout
 - **checkout.many.spec.ts**: meant for tests performing the checkout of a single product, then back to the list of products, then checkout other, then check the cart, and finally proceed
+
+## Helper Objects
+
+Under [pages](./pages/) we can find some helper objects and page objects, as follows:
+
+- [AuthenticateData](./pages/authentication/AuthenticateData.ts): interfaces with a JSON file to give us access to information about test users (username, password, error message when login fails, and the playwright session filename)
+- [AuthenticatePage](./pages/authentication/AuthenticatePage.ts): a page object to login on the Saucedemo environment, isolating such methods and logic from all other page-objects
+- [StepController](./pages/common/StepController.ts): allow us to have a wrapper to run some code before/after each test step - a feature missing in Playwright (see [more above](#test-steps))
+- [TestInfoPage](./pages/common/TestInfoPage.ts): allow our step wrapper mentioned before to add information on the Playwright HTML report.
+- [ProductsPage](./pages/ProductsPage.ts): a page object to interact with product listing. Will be expanded in the future.

@@ -12,6 +12,7 @@ import { BrowserContext, Page, test as baseTest, expect } from '@playwright/test
  *
  * After each step, we:
  * - attach the current page screenshot to the HTML report
+ * - automatically expect the page snapshot to match
  * - add a line to stdout (which is also part of Playwright HTML report)
  */
 export class StepController {
@@ -35,6 +36,7 @@ export class StepController {
         await this.testInfoPage.addStdout('After step - ' + title);
         await this.attachScreenshot('After step - ' + title);
         this.testInfoPage.addStdoutDivisor();
+        await this.expectScreenshot(this.page);
       },
       // boxedStep needs that so error messages are shown nicely
       { box: true }

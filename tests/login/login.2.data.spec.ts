@@ -1,24 +1,14 @@
 import { expect } from '@playwright/test';
 import test from '../base';
+import { AuthenticateData, UserData } from '../../pages/authentication/AuthenticateData'
 
-const testData = [
-    {
-        username: process.env.SAUCEDEMO_STD_USER,
-        password: process.env.SAUCEDEMO_STD_USER,
-        error: 'Username and password do not match any user in this service'
-    },
-    {
-        username: 'locked_out_user',
-        password: process.env.SAUCEDEMO_STD_PASS,
-        error: 'Sorry, this user has been locked out.'
-    }
-]
+const testData = new AuthenticateData().getAllNonDefault()
 
 // Reset storage state for this file to avoid being authenticated so we can test it all here
 test.use({ storageState: { cookies: [], origins: [] } });
 
-testData.forEach(data => {
-    test(`@Login Bad login flow with user ${data.username}`, async ({ page }) => {
+testData.forEach( (data: UserData) => {
+    test(`Bad login flow with user ${data.username}`, { tag: '@Login' }, async ({ page }) => {
         // Navigate
         await page.goto('/v1');
         await expect(page.getByTestId('username')).toBeVisible();

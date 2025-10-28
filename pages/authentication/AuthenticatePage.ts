@@ -1,12 +1,11 @@
 // @ts-check
+import { AuthenticateData, UserData } from './AuthenticateData';
 import { Page, BrowserContext, expect, test as baseTest } from '@playwright/test';
 
 export class AuthenticatePage {
-  constructor(readonly page: Page, readonly context: BrowserContext) {}
-
-  async login(): Promise<void> {
-    await this.open();
-    await this.fillInStandardUser();
+  private readonly data;
+  constructor(readonly page: Page, readonly context: BrowserContext) {
+    this.data = new AuthenticateData();
   }
 
   async open(): Promise<void> {
@@ -14,8 +13,10 @@ export class AuthenticatePage {
     await expect(this.page.getByTestId('username')).toBeVisible();
   }
 
-  async fillInStandardUser(): Promise<void> {
-    await this.fillIn(process.env.SAUCEDEMO_STD_USER, process.env.SAUCEDEMO_STD_PASS);
+  async fillInStandardUser(): Promise<UserData> {
+    const user: UserData = this.data.getDefault();
+    await this.fillIn(user.username, user.password);
+    return user;
   }
 
   async fillIn(username: string, password: string): Promise<void> {

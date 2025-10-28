@@ -21,15 +21,13 @@ jobs:
     - name: Create and populate .env file
       run: |
         echo "SAUCEDEMO_BASE_URL=${{ vars.SAUCEDEMO_BASE_URL }}" >> .env
-        echo "SAUCEDEMO_STD_USER=${{ vars.SAUCEDEMO_STD_USER }}" >> .env
-        echo "SAUCEDEMO_STD_PASS=${{ vars.SAUCEDEMO_STD_PASS }}" >> .env
     - name: Run Playwright tests
       run: npm run test # Using npm run to call our run test script that lint and compile it all
     - uses: actions/upload-artifact@v4
       if: ${{ always() }} # Run even if previous step exit with -1
       with:
         name: playwright-report
-        path: playwright-report/
+        path: tests-out/playwright-report/
         retention-days: 30
 
   publish-report:
