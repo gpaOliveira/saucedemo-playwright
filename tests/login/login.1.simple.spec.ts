@@ -6,7 +6,9 @@ test.use({ storageState: { cookies: [], origins: [] } });
 
 test('Bad login flow with playwright', { tag: '@Login' }, async ({ page }) => {
   // Navigate
-  await page.goto('/v1');
+  // TODO: v1 smart switch
+  //await page.goto('/v1');
+  await page.goto('/');
   await expect(page.getByTestId('username')).toBeVisible();
 
   // Fill in bad user credentials
@@ -15,5 +17,9 @@ test('Bad login flow with playwright', { tag: '@Login' }, async ({ page }) => {
   await page.locator('#login-button').click();
 
   // Make sure we see the error message we want
-  await expect(page.getByTestId('error').filter({hasText: 'Username and password do not match any user in this service'})).toBeVisible()
+  await expect(
+    page.getByTestId('error').filter({
+      hasText: 'Username and password do not match any user in this service',
+    }),
+  ).toBeVisible();
 });

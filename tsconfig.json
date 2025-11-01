@@ -1,25 +1,21 @@
 {
-    "compilerOptions": {
-      "target": "ES2022",
-      "lib": ["ESNext", "dom"],
-      "module": "NodeNext",
-      "esModuleInterop": true,
-      "resolveJsonModule": true,
-      "moduleResolution": "nodenext",
-      "sourceMap": true,
-      "emitDecoratorMetadata": true,
-      "experimentalDecorators": true,
-      /*Re-map imports */
-      "paths": {
-        "@common/*": ["./pages/common/*"],
-        "@authentication/*": ["./pages/authentication/*"],
-        "@pages/*": ["./pages/*"]
-      }
-    },
-    /*Make sure to include JSON files like pages/authentication/authenticate_data.json */
-    "include": [
-      "**/*",
-      ".env",
-      "**/*.json"
-    ]
-  }
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ESNext", "dom"],
+    "module": "NodeNext",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "nodenext",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    /*Re-map imports */
+    "paths": {
+      "@common/*": ["./pages/common/*"],
+      "@authentication/*": ["./pages/authentication/*"],
+      "@pages/*": ["./pages/*"]
+    }
+  },
+  /*Make sure to include JSON files like pages/authentication/authenticate_data.json */
+  "include": ["**/*", ".env", "**/*.json"]
+}

@@ -1,15 +1,23 @@
 // @ts-check
 import { AuthenticateData, UserData } from './AuthenticateData';
-import { Page, BrowserContext, expect, test as baseTest } from '@playwright/test';
+import {
+  Page,
+  BrowserContext,
+  expect,
+  test as baseTest,
+} from '@playwright/test';
 
 export class AuthenticatePage {
   private readonly data;
-  constructor(readonly page: Page, readonly context: BrowserContext) {
+  constructor(
+    readonly page: Page,
+    readonly context: BrowserContext,
+  ) {
     this.data = new AuthenticateData();
   }
 
   async open(): Promise<void> {
-    await this.page.goto('/v1');
+    await this.page.goto('/');
     await expect(this.page.getByTestId('username')).toBeVisible();
   }
 
@@ -26,7 +34,9 @@ export class AuthenticatePage {
   }
 
   async expectError(hasText: string): Promise<void> {
-    await expect(this.page.getByTestId('error').filter({hasText})).toBeVisible()
+    await expect(
+      this.page.getByTestId('error').filter({ hasText }),
+    ).toBeVisible();
   }
 }
 

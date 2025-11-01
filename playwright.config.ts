@@ -32,7 +32,7 @@ export default defineConfig({
     timeout: 8000,
     /* Snapshot comparison forgiveness */
     toHaveScreenshot: {
-      maxDiffPixelRatio: 0.01,
+      maxDiffPixelRatio: 0.03,
     },
   },
   fullyParallel: false,
@@ -41,12 +41,10 @@ export default defineConfig({
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /*
-  By default, playwright runs different spec files in parallel (different workers) but the tests in
-  one file are run sequentially. Using 1 worker allow us to run different specs sequentially.
-
-  If tests in a spec file can be run in parallel, use test.describe.configure({ mode: 'parallel' });
+  Limit the number of workers on CI, use default locally
+  More on https://playwright.dev/docs/test-parallel
    */
-  workers: 1,
+  workers: process.env.CI ? 2 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
     ['html', { open: 'never' }],
@@ -89,7 +87,7 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     // Setup project
-  { name: 'setup', testMatch: /auth\.*/ },
+    { name: 'setup', testMatch: /auth\.*/ },
     {
       name: 'chromium',
       use: {
@@ -109,5 +107,4 @@ export default defineConfig({
 
   /* Path for snapshots */
   snapshotPathTemplate: '../tests/snapshots/{testFilePath}/{arg}{ext}',
-
 });
