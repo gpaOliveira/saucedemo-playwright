@@ -116,10 +116,10 @@ Here's a description on _why_ each spec file (or even test exist, so one can bet
 Under [pages](./pages/) we can find some helper objects and page objects, as follows:
 
 - [AuthenticateData](./pages/authentication/AuthenticateData.ts): interfaces with a JSON file to give us access to information about test users (username, password, error message when login fails, and the playwright session filename)
-- [AuthenticatePage*](./pages/authentication/AuthenticatePage.ts): a page object to login on the Saucedemo environment, isolating such methods and logic from all other page-objects. Use it in tests as a fixture with  `authenticatePage`.
-- [StepController*](./pages/common/StepController.ts): allow us to have a wrapper to run some code before/after each test step - a feature missing in Playwright (see [more above](#test-steps)). Use it in tests as a fixture with `step`.
+- [AuthenticatePage\*](./pages/authentication/AuthenticatePage.ts): a page object to login on the Saucedemo environment, isolating such methods and logic from all other page-objects. Use it in tests as a fixture with `authenticatePage`.
+- [StepController\*](./pages/common/StepController.ts): allow us to have a wrapper to run some code before/after each test step - a feature missing in Playwright (see [more above](#test-steps)). Use it in tests as a fixture with `step`.
 - [TestInfoPage](./pages/common/TestInfoPage.ts): allow our step wrapper mentioned before to add information on the Playwright HTML report.
-- [ProductsPage*](./pages/ProductsPage.ts): a page object to interact with product listing. Will be expanded in the future. Use it in tests as a fixture with `productsPage`.
+- [ProductsPage\*](./pages/ProductsPage.ts): a page object to interact with product listing. Will be expanded in the future. Use it in tests as a fixture with `productsPage`.
 
 All those helper marker with `*` objects are accessible as [fixtures](https://playwright.dev/docs/test-fixtures) for tests. We use [mergeTests](https://playwright.dev/docs/test-fixtures#combine-custom-fixtures-from-multiple-modules) in [base.ts](./tests/base.ts) so that the fixture declaration remains in the same file as the page object and IDEs can easily navigate you there when you hover+click on the fixture as part of a test.
 
@@ -127,8 +127,8 @@ All those helper marker with `*` objects are accessible as [fixtures](https://pl
 
 - Smart v1 vs v0 switch: sometimes Saucedemo URL for v1 is not working so we have to be flexible here. Luckly the selectors are all the same
 - Checkout tests
-    - **checkout.spec.ts**: meant for tests performing the checkout of a single product and then checkout
-    - **checkout.multiple.spec.ts**: meant for tests performing the checkout of lots of products (in the products page) and then check the cart number and then checkout
-    - **checkout.many.spec.ts**: meant for tests performing the checkout of a single product, then back to the list of products, then checkout other, then check the cart, and finally proceed
+  - **checkout.spec.ts**: meant for tests performing the checkout of a single product and then checkout
+  - **checkout.multiple.spec.ts**: meant for tests performing the checkout of lots of products (in the products page) and then check the cart number and then checkout
+  - **checkout.many.spec.ts**: meant for tests performing the checkout of a single product, then back to the list of products, then checkout other, then check the cart, and finally proceed
 - [WebVitals](https://web.dev/articles/vitals) integration with Playwright
 - [DevContainers](https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers) to run tests

@@ -52,16 +52,20 @@ const SortingFunctions: Record<
 export class ProductsPage {
   readonly sortContainer: Locator;
   readonly inventoryItems: Locator;
-  sortSelector: string = '.product_sort_container';
-  itemSelector: string = '.inventory_item';
-  itemNameSelector: string = '.inventory_item_name';
-  itemPriceSelector: string = '.inventory_item_price';
+  readonly inventoryItemName: Locator;
+  readonly inventoryItemPrice: Locator;
   constructor(
     readonly page: Page,
     readonly context: BrowserContext,
   ) {
-    this.sortContainer = this.page.locator(this.sortSelector);
-    this.inventoryItems = this.page.locator(this.itemSelector);
+    this.sortContainer = this.page.locator('.product_sort_container');
+    this.inventoryItems = this.page.locator('.inventory_item');
+    this.inventoryItemName = this.page.locator(
+      '.inventory_item .inventory_item_name',
+    );
+    this.inventoryItemPrice = this.page.locator(
+      '.inventory_item .inventory_item_price',
+    );
   }
 
   async navigate(): Promise<void> {
@@ -90,13 +94,21 @@ export class ProductsPage {
    * await page.expectProductAt(0, { title: "abc", price: "123" });
    */
   async expectProductAt(index: number, item: ProductItem): Promise<void> {
-    const inventoryItem = this.inventoryItems.nth(index);
-    await expect(inventoryItem.locator(this.itemNameSelector)).toHaveText(
-      item.title,
-    );
-    await expect(inventoryItem.locator(this.itemPriceSelector)).toHaveText(
+    await expect(this.inventoryItemName.nth(index)).toHaveText(item.title);
+    await expect(this.inventoryItemPrice.nth(index)).toHaveText(
       `$${item.price}`,
     );
+  }
+
+  /**
+   * Get a list of locators innerText
+   * @returns {Promise<Promise<string>[]>} The list of product names
+   * @example
+   * let names = await this.listLocatorText(this.inventoryItemName);
+   * let prices = await this.listLocatorText(this.inventoryItemPrice);
+   */
+  async listLocatorText(locator: Locator): Promise<Promise<string>[]> {
+    return (await locator.all()).map((el) => el.innerText());
   }
 
   /**
@@ -107,16 +119,13 @@ export class ProductsPage {
    * const result = await page.listProducts(SortingOptions.AZ);
    */
   async listProducts(option: SortingOptionsType): Promise<ProductItem[]> {
-    var products = [];
-    for (const el of await this.inventoryItems.all()) {
+    var products: ProductItem[] = [];
+    const names = await this.listLocatorText(this.inventoryItemName),
+      prices = await this.listLocatorText(this.inventoryItemPrice);
+    for (var i = 0; i < names.length; i++) {
       products.push({
-        title: await el.locator(this.itemNameSelector).innerText(),
-        price: parseFloat(
-          (await el.locator(this.itemPriceSelector).innerText()).replace(
-            '$',
-            '',
-          ),
-        ),
+        title: await names[i],
+        price: parseFloat((await prices[i]).replace('$', '')),
       });
     }
     products.sort(SortingFunctions[option]);
@@ -140,13 +149,11 @@ export class ProductsPage {
    * await page.expectListProducts(SortingOption.AZ);
    */
   async expectListProducts(option: SortingOptionsType): Promise<void> {
-    const screenProducts = await this.listProducts(option);
-    for (const [index, item] of screenProducts.entries()) {
-      await this.expectProductAt(index, {
-        title: item.title,
-        price: item.price,
-      });
-    }
+    const screenProducts = await this.listProducts(option),
+      productsNames = screenProducts.map((el) => el.title),
+      productsPrices = screenProducts.map((el) => `$${el.price}`);
+    await expect(this.inventoryItemName).toHaveText(productsNames);
+    await expect(this.inventoryItemPrice).toHaveText(productsPrices);
   }
 }
 
