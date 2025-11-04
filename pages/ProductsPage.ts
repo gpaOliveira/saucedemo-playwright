@@ -54,18 +54,20 @@ export class ProductsPage {
   readonly inventoryItems: Locator;
   readonly inventoryItemName: Locator;
   readonly inventoryItemPrice: Locator;
+  readonly shoppingCart: Locator;
   constructor(
     readonly page: Page,
     readonly context: BrowserContext,
   ) {
     this.sortContainer = this.page.locator('.product_sort_container');
     this.inventoryItems = this.page.locator('.inventory_item');
-    this.inventoryItemName = this.page.locator(
-      '.inventory_item .inventory_item_name',
+    this.inventoryItemName = this.inventoryItems.locator(
+      '.inventory_item_name',
     );
-    this.inventoryItemPrice = this.page.locator(
-      '.inventory_item .inventory_item_price',
+    this.inventoryItemPrice = this.inventoryItems.locator(
+      '.inventory_item_price',
     );
+    this.shoppingCart = this.page.locator('shopping-cart-link');
   }
 
   async navigate(): Promise<void> {
@@ -84,6 +86,15 @@ export class ProductsPage {
 
   async expectSorting(option: SortingOptionsType) {
     await expect(this.sortContainer).toHaveValue(option);
+  }
+
+  async addToCart(product: ProductItem): Promise<void> {
+    const testId = `add-to-cart-${product.title.toLowerCase().replaceAll(' ', '-')}`;
+    await this.page.click(testId);
+  }
+
+  async expectAmountInCart(amount: number): Promise<void> {
+    await expect(this.shoppingCart).toHaveText(amount >= 0 ? `${amount}` : '');
   }
 
   /**
