@@ -106,29 +106,31 @@ Here's a description on _why_ each spec file (or even test exist, so one can bet
 
 - [auth.ts](tests/auth.ts): set our authentication context for all tests
 - [base.ts](tests/base.ts): override Playwright `test` with our page objects [fixtures](https://playwright.dev/docs/test-fixtures), which come from each page object file (a choice made for ease of navigation - IDEs such as VsCode navigate to the page object file directly when clicking on a fixture)
-- [products_listing/product.spec.ts](tests/products.spec.ts): meant for tests listing products, validating the amount of products and the sorting dropdown behaviour changing such a list order in the UI.
 - [login.1.simple.spec.ts](tests/login/login.1.simple.spec.ts): Simple test to try to login with a bad user - no page object at all.
 - [login.2.data.spec.ts](tests/login/login.2.data.spec.ts): Add a second pair of credentials to show how tests can be done based on a data file
 - [login.3.pom.spec.ts](tests/login//login.3.pom.spec.ts): Use [Page Objects](https://playwright.dev/docs/pom) to shorten the test with data files further
+- [products_listing/product.spec.ts](tests/products/products_listing.spec.ts): meant for tests listing products, validating the amount of products and the sorting dropdown behaviour changing such a list order in the UI
+- [products/checkout.spec.ts](tests/checkout.spec.ts): meant for tests involving checking out, validating we can do it with one or multiple items (and the price math in the end holds true along with the items order in the overview), if the back navigation is OK, if empty client information are not accepted, and some other edge cases
 
 ## Helper Objects
 
 Under [pages](./pages/) we can find some helper objects and page objects, as follows:
 
 - [AuthenticateData](./pages/authentication/AuthenticateData.ts): interfaces with a JSON file to give us access to information about test users (username, password, error message when login fails, and the playwright session filename)
-- [AuthenticatePage\*](./pages/authentication/AuthenticatePage.ts): a page object to login on the Saucedemo environment, isolating such methods and logic from all other page-objects. Use it in tests as a fixture with `authenticatePage`.
-- [StepController\*](./pages/common/StepController.ts): allow us to have a wrapper to run some code before/after each test step - a feature missing in Playwright (see [more above](#test-steps)). Use it in tests as a fixture with `step`.
-- [TestInfoPage](./pages/common/TestInfoPage.ts): allow our step wrapper mentioned before to add information on the Playwright HTML report.
-- [ProductsPage\*](./pages/ProductsPage.ts): a page object to interact with product listing. Will be expanded in the future. Use it in tests as a fixture with `productsPage`.
+- [AuthenticatePage\*](./pages/authentication/AuthenticatePage.ts): a page object to login on the Saucedemo environment, isolating such methods and logic from all other page-objects. Use it in tests as a fixture with `authenticatePage`
+- [StepController\*](./pages/common/StepController.ts): allow us to have a wrapper to run some code before/after each test step - a feature missing in Playwright (see [more above](#test-steps)). Use it in tests as a fixture with `step`
+- [TestInfoPage](./pages/common/TestInfoPage.ts): allow our step wrapper mentioned before to add information on the Playwright HTML report
+- [ProductsPage\*](./pages/ProductsPage.ts): a page object to interact with product listing. Use it in tests as a fixture with `productsPage`
+- [ProductItemPage](./pages/ProductItemPage.ts): a page object to interact with the product items on the screen, checking if the list items (and their order) are correct. Exposed as a public object in multiple other fixtures (such as `productsPage.productItemPage` and `cartPage.productItemPage`)
+- [CartPage\*](./pages/CartPage.ts): a page object to interact with the cart icon and the page accessible by it, where checkout will start. Use it in tests as a fixture with `cartPage`
+- [CheckoutInfoPage\*](./pages/CheckoutInfoPage.ts): a page object to interact with the first step of the checkout process, where the user is asked to fill in their personal information. Use it in tests as a fixture with `infoPage`
+- [CheckoutOverviewPage\*](./pages/CheckoutOverviewPage.ts): a page object to interact with the second step of the checkout process, containing the overview of the order (same as the CartPage) plus the total price (plus taxes). Use it in tests as a fixture with `overviewPage`
+- [CheckoutCompletePage\*](./pages/CheckoutCompletePage.ts): a page object to interact with the confimartion of the order. Use it in tests as a fixture with `completePage`
 
 All those helper marker with `*` objects are accessible as [fixtures](https://playwright.dev/docs/test-fixtures) for tests. We use [mergeTests](https://playwright.dev/docs/test-fixtures#combine-custom-fixtures-from-multiple-modules) in [base.ts](./tests/base.ts) so that the fixture declaration remains in the same file as the page object and IDEs can easily navigate you there when you hover+click on the fixture as part of a test.
 
 ## Future ToDos
 
-- Smart v1 vs v0 switch: sometimes Saucedemo URL for v1 is not working so we have to be flexible here. Luckly the selectors are all the same
-- Checkout tests
-  - **checkout.spec.ts**: meant for tests performing the checkout of a single product and then checkout
-  - **checkout.multiple.spec.ts**: meant for tests performing the checkout of lots of products (in the products page) and then check the cart number and then checkout
-  - **checkout.many.spec.ts**: meant for tests performing the checkout of a single product, then back to the list of products, then checkout other, then check the cart, and finally proceed
+- Smart v1 vs v0 switch: sometimes Saucedemo URL for v1 is not working so we have to be flexible here. Luckily the selectors are all the same :)
 - [WebVitals](https://web.dev/articles/vitals) integration with Playwright
 - [DevContainers](https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers) to run tests
