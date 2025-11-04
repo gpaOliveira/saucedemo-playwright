@@ -1,6 +1,11 @@
 // @ts-check
 import { TestInfoPage } from './TestInfoPage';
-import { BrowserContext, Page, test as baseTest, expect } from '@playwright/test';
+import {
+  BrowserContext,
+  Page,
+  test as baseTest,
+  expect,
+} from '@playwright/test';
 
 /*
  * StepController supports the reporting of information before/after each test step - a feature missing
@@ -19,11 +24,14 @@ export class StepController {
   constructor(
     readonly page: Page,
     readonly context: BrowserContext,
-    readonly testInfoPage: TestInfoPage
+    readonly testInfoPage: TestInfoPage,
   ) {}
 
   async attachScreenshot(title: string): Promise<void> {
-    await this.testInfoPage.attachScreenshot(title, await this.page.screenshot());
+    await this.testInfoPage.attachScreenshot(
+      title,
+      await this.page.screenshot(),
+    );
   }
 
   async in(title: string, target: () => void): Promise<void> {
@@ -39,7 +47,7 @@ export class StepController {
         await this.expectScreenshot(this.page);
       },
       // boxedStep needs that so error messages are shown nicely
-      { box: true }
+      { box: true },
     );
   }
 
@@ -57,5 +65,5 @@ export const test = baseTest.extend<{
   },
   testInfoPage: async ({}, use, testInfo) => {
     await use(new TestInfoPage(testInfo));
-  }
+  },
 });

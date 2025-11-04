@@ -22,9 +22,10 @@ Here's a description of the commands available for `npm run`:
 - **type-check:** type check for Typescript. Run automatically as part of `test`;
 - **check:** perform both a `eslist` check and a type check for Typescript. Run automatically as part of `test`;
 - **compile:** manually compile our tests (see more [details below](#compile-with-particular-ts-config)). Run automatically as part of `test`;
-- **test:** run all tests, compiling them first. If you need to [run a particular test](https://playwright.dev/docs/running-tests#run-specific-tests), you can use `spec=my.spec.ts; npm run test`;
-- **debug:** run all tests with the `--debug` flag. You can use `spec=my.spec.ts; npm run debug` if needed;
-- **screenshot:** run all tests with the `--update-snapshots` flag. You can use `spec=my.spec.ts; npm run screenshot` if needed. See more about this [below](#screenshots);
+- **format:** manually fix formatting with Prettier.
+- **test:** run all tests, compiling them and linting them first. If you need to [run a particular test](https://playwright.dev/docs/running-tests#run-specific-tests), you can use `spec=my.spec.ts; npm run test`;
+- **debug:** run all tests with the `--debug` flag, compiling first. You can use `spec=my.spec.ts; npm run debug` if needed;
+- **screenshot:** run all tests with the `--update-snapshots` flag, compiling first. You can use `spec=my.spec.ts; npm run screenshot` if needed. See more about this [below](#screenshots);
 
 ## Other interesting features
 
@@ -38,11 +39,13 @@ For such cases the recommendation is to [manually compile the tests TS files](ht
 
 For such cases, the `npm run test` and `npm run debug` and `npm run screenshot` are already all reading from where the compiled code goes (a folder named `tests-out`).
 
-### Linting
+### Linting + Prettier
 
 ESLinting can be used with playwright to help us not forget about removing pesky `console.log` or adding expectations in every test.
 
 This is run automatically when tests are run, so no special pipeline stage is needed for it.
+
+There's also prettier setup, so remember to run `npm run format` every now and then or else the linting will fail.
 
 ### Test Steps
 
@@ -63,9 +66,9 @@ test('My test', async ({ step }) => {
 });
 ```
 
-Moreover, having such `step.in` method allow us to execute some code before or after *every* step. For now, we take screenshots (see below) and add them to the HTML report, but maybe you'd like to borrow the idea and cleanup our backend or grab some logs.
+Moreover, having such `step.in` method allow us to execute some code before or after _every_ step. For now, we take screenshots (see below) and add them to the HTML report, but maybe you'd like to borrow the idea and cleanup our backend or grab some logs.
 
-Alternatively, one could argue that instead of grouping many code lines in a test (and in a step), we could have a broader page object calling other page objects. While this is indeed a viable alternative, such code indirection may confuse some people (especially if one have to jump through many methods until finding a selector they're interested in). Besides, if you do that, you also lose the ability to execute some code before or after *every* block of code.
+Alternatively, one could argue that instead of grouping many code lines in a test (and in a step), we could have a broader page object calling other page objects. While this is indeed a viable alternative, such code indirection may confuse some people (especially if one have to jump through many methods until finding a selector they're interested in). Besides, if you do that, you also lose the ability to execute some code before or after _every_ block of code.
 
 ### Snapshots
 
@@ -101,25 +104,31 @@ See more about this [in the docs](https://playwright.dev/docs/auth#basic-shared-
 
 Here's a description on _why_ each spec file (or even test exist, so one can better navigate them), so you understand the rationale behind each of them and can navigate to the ones you'd like to know more about:
 
-
 - [auth.ts](tests/auth.ts): set our authentication context for all tests
 - [base.ts](tests/base.ts): override Playwright `test` with our page objects [fixtures](https://playwright.dev/docs/test-fixtures), which come from each page object file (a choice made for ease of navigation - IDEs such as VsCode navigate to the page object file directly when clicking on a fixture)
-- [product.spec.ts](tests/products.spec.ts): meant for tests listing products, currently only there to make sure `auth.ts` works fine. Later will have actual tests validating the amount of products (and their images and prices) and the sorting dropdown. Maybe will be part of a folder as well to show the different with page-objects tests and without
+- [products_listing/product.spec.ts](tests/products.spec.ts): meant for tests listing products, validating the amount of products and the sorting dropdown behaviour changing such a list order in the UI.
 - [login.1.simple.spec.ts](tests/login/login.1.simple.spec.ts): Simple test to try to login with a bad user - no page object at all.
 - [login.2.data.spec.ts](tests/login/login.2.data.spec.ts): Add a second pair of credentials to show how tests can be done based on a data file
 - [login.3.pom.spec.ts](tests/login//login.3.pom.spec.ts): Use [Page Objects](https://playwright.dev/docs/pom) to shorten the test with data files further
-
-Future ones include (may all become folders, will decide when I get there):
-- **checkout.spec.ts**: meant for tests performing the checkout of a single product and then checkout
-- **checkout.multiple.spec.ts**: meant for tests performing the checkout of lots of products (in the products page) and then check the cart number and then checkout
-- **checkout.many.spec.ts**: meant for tests performing the checkout of a single product, then back to the list of products, then checkout other, then check the cart, and finally proceed
 
 ## Helper Objects
 
 Under [pages](./pages/) we can find some helper objects and page objects, as follows:
 
 - [AuthenticateData](./pages/authentication/AuthenticateData.ts): interfaces with a JSON file to give us access to information about test users (username, password, error message when login fails, and the playwright session filename)
-- [AuthenticatePage](./pages/authentication/AuthenticatePage.ts): a page object to login on the Saucedemo environment, isolating such methods and logic from all other page-objects
-- [StepController](./pages/common/StepController.ts): allow us to have a wrapper to run some code before/after each test step - a feature missing in Playwright (see [more above](#test-steps))
+- [AuthenticatePage\*](./pages/authentication/AuthenticatePage.ts): a page object to login on the Saucedemo environment, isolating such methods and logic from all other page-objects. Use it in tests as a fixture with `authenticatePage`.
+- [StepController\*](./pages/common/StepController.ts): allow us to have a wrapper to run some code before/after each test step - a feature missing in Playwright (see [more above](#test-steps)). Use it in tests as a fixture with `step`.
 - [TestInfoPage](./pages/common/TestInfoPage.ts): allow our step wrapper mentioned before to add information on the Playwright HTML report.
-- [ProductsPage](./pages/ProductsPage.ts): a page object to interact with product listing. Will be expanded in the future.
+- [ProductsPage\*](./pages/ProductsPage.ts): a page object to interact with product listing. Will be expanded in the future. Use it in tests as a fixture with `productsPage`.
+
+All those helper marker with `*` objects are accessible as [fixtures](https://playwright.dev/docs/test-fixtures) for tests. We use [mergeTests](https://playwright.dev/docs/test-fixtures#combine-custom-fixtures-from-multiple-modules) in [base.ts](./tests/base.ts) so that the fixture declaration remains in the same file as the page object and IDEs can easily navigate you there when you hover+click on the fixture as part of a test.
+
+## Future ToDos
+
+- Smart v1 vs v0 switch: sometimes Saucedemo URL for v1 is not working so we have to be flexible here. Luckly the selectors are all the same
+- Checkout tests
+  - **checkout.spec.ts**: meant for tests performing the checkout of a single product and then checkout
+  - **checkout.multiple.spec.ts**: meant for tests performing the checkout of lots of products (in the products page) and then check the cart number and then checkout
+  - **checkout.many.spec.ts**: meant for tests performing the checkout of a single product, then back to the list of products, then checkout other, then check the cart, and finally proceed
+- [WebVitals](https://web.dev/articles/vitals) integration with Playwright
+- [DevContainers](https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers) to run tests

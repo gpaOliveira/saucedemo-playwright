@@ -1,15 +1,159 @@
 // @ts-check
-import { Page, BrowserContext, expect, test as baseTest } from '@playwright/test';
+import {
+  Page,
+  BrowserContext,
+  Locator,
+  expect,
+  test as baseTest,
+} from '@playwright/test';
+
+export enum SortingOptions {
+  AZ = 'az',
+  ZA = 'za',
+  LOHI = 'lohi',
+  HILO = 'hilo',
+}
+
+type SortingOptionsType =
+  | SortingOptions.AZ
+  | SortingOptions.ZA
+  | SortingOptions.LOHI
+  | SortingOptions.HILO;
+
+export type ProductItem = {
+  title: string;
+  price: number;
+};
+
+const SortingFunctions: Record<
+  SortingOptions,
+  (a: ProductItem, b: ProductItem) => number
+> = {
+  [SortingOptions.AZ]: (a, b) => a.title.localeCompare(b.title),
+  [SortingOptions.ZA]: (a, b) => b.title.localeCompare(a.title),
+  [SortingOptions.LOHI]: function (a: ProductItem, b: ProductItem): number {
+    if (a.price == b.price)
+      // ascending by title
+      return a.title.localeCompare(b.title);
+    else
+      // ascending by price
+      return a.price - b.price;
+  },
+  [SortingOptions.HILO]: function (a: ProductItem, b: ProductItem): number {
+    if (a.price == b.price)
+      // ascending by title
+      return a.title.localeCompare(b.title);
+    else
+      // descending by price
+      return b.price - a.price;
+  },
+};
 
 export class ProductsPage {
-  constructor(readonly page: Page, readonly context: BrowserContext) {}
+  readonly sortContainer: Locator;
+  readonly inventoryItems: Locator;
+  readonly inventoryItemName: Locator;
+  readonly inventoryItemPrice: Locator;
+  constructor(
+    readonly page: Page,
+    readonly context: BrowserContext,
+  ) {
+    this.sortContainer = this.page.locator('.product_sort_container');
+    this.inventoryItems = this.page.locator('.inventory_item');
+    this.inventoryItemName = this.page.locator(
+      '.inventory_item .inventory_item_name',
+    );
+    this.inventoryItemPrice = this.page.locator(
+      '.inventory_item .inventory_item_price',
+    );
+  }
 
   async navigate(): Promise<void> {
-    await this.page.goto('/v1/inventory');
+    // TODO: v1 smart switch
+    //await this.page.goto('/v1/inventory');
+    await this.page.goto('/inventory.html');
   }
 
   async expectVisible(): Promise<void> {
     await expect(this.page.getByText('Products')).toBeVisible();
+  }
+
+  async selectSorting(option: SortingOptionsType) {
+    await this.sortContainer.selectOption(option);
+  }
+
+  async expectSorting(option: SortingOptionsType) {
+    await expect(this.sortContainer).toHaveValue(option);
+  }
+
+  /**
+   * Check a product's name and price are seen in the nth position given by index
+   * @param {SortingOptionsType} option - The sorting criteria to use.
+   * @param {ProductItem} item - The product (which carries the price and title)
+   * @example
+   * await page.expectProductAt(0, { title: "abc", price: "123" });
+   */
+  async expectProductAt(index: number, item: ProductItem): Promise<void> {
+    await expect(this.inventoryItemName.nth(index)).toHaveText(item.title);
+    await expect(this.inventoryItemPrice.nth(index)).toHaveText(
+      `$${item.price}`,
+    );
+  }
+
+  /**
+   * Get a list of locators innerText
+   * @returns {Promise<Promise<string>[]>} The list of product names
+   * @example
+   * let names = await this.listLocatorText(this.inventoryItemName);
+   * let prices = await this.listLocatorText(this.inventoryItemPrice);
+   */
+  async listLocatorText(locator: Locator): Promise<Promise<string>[]> {
+    return (await locator.all()).map((el) => el.innerText());
+  }
+
+  /**
+   * Get a list of products seen in the listing page sorted by some criteria.
+   * @param {SortingOptionsType} option - The sorting criteria to use.
+   * @returns {Promise<ProductItem[]>} The list of products
+   * @example
+   * const result = await page.listProducts(SortingOptions.AZ);
+   */
+  async listProducts(option: SortingOptionsType): Promise<ProductItem[]> {
+    var products: ProductItem[] = [];
+    const names = await this.listLocatorText(this.inventoryItemName),
+      prices = await this.listLocatorText(this.inventoryItemPrice);
+    for (var i = 0; i < names.length; i++) {
+      products.push({
+        title: await names[i],
+        price: parseFloat((await prices[i]).replace('$', '')),
+      });
+    }
+    products.sort(SortingFunctions[option]);
+    return products;
+  }
+
+  /**
+   * Check if items we see in the screen are sorted correctly.
+   *
+   * To know that, we:
+   * 1. inform the sorting criteria we expect
+   * 2. get the products we see in the screen
+   * 3. sort by the criteria we expect
+   * 4. check each item in the list (after sorting) matches the position it was retrieved from
+   *
+   * If our expectation of the sorting criteria is correct, the items we got on step 1. will
+   * be the same after step 3.
+   *
+   * @param {SortingOptionsType} option - The sorting criteria to use.
+   * @example
+   * await page.expectListProducts(SortingOption.AZ);
+   */
+  async expectListProducts(option: SortingOptionsType): Promise<void> {
+    const screenProducts = await this.listProducts(option),
+      productsNames = screenProducts.map((el) => el.title),
+      productsPrices = screenProducts.map((el) => `$${el.price}`);
+    await expect(this.inventoryItemName).toHaveText(productsNames);
+    await expect(this.inventoryItemPrice).toHaveText(productsPrices);
   }
 }
 
