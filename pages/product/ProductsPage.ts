@@ -42,13 +42,11 @@ export class ProductsPage {
   }
 
   async addToCart(product: ProductItem): Promise<void> {
-    const testId = `add-to-cart-${product.title.toLowerCase().replaceAll(' ', '-')}`;
-    await this.page.getByTestId(testId).click();
+    await this.productItemPage.clickButtonOnProduct(product, 'Add to cart');
   }
 
   async removeFromCart(product: ProductItem): Promise<void> {
-    const testId = `remove-${product.title.toLowerCase().replaceAll(' ', '-')}`;
-    await this.page.getByTestId(testId).click();
+    await this.productItemPage.clickButtonOnProduct(product, 'Remove');
   }
 
   /**

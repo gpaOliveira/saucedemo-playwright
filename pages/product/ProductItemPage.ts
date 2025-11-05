@@ -23,6 +23,16 @@ export class ProductItemPage {
     );
   }
 
+  async clickButtonOnProduct(
+    product: ProductItem,
+    buttonName: 'Remove' | 'Add to cart',
+  ): Promise<void> {
+    await this.inventoryItems
+      .filter({ hasText: product.title })
+      .getByRole('button', { name: buttonName })
+      .click();
+  }
+
   /**
    * Check a product's name and price are seen in the nth position given by index
    * @param {number} index - The nth position to check
