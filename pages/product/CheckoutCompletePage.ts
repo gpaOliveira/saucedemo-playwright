@@ -1,29 +1,20 @@
+import { BasePage, PageIdentifier } from '@pages/base/BasePage';
 import {
   Page,
   BrowserContext,
   Locator,
-  expect,
   test as baseTest,
 } from '@playwright/test';
 
-export class CheckoutCompletePage {
+export class CheckoutCompletePage extends BasePage {
   readonly backHomeButton: Locator;
 
   constructor(
     readonly page: Page,
     readonly context: BrowserContext,
   ) {
+    super(page, context, PageIdentifier.CheckoutComplete);
     this.backHomeButton = this.page.getByTestId('back-to-products');
-  }
-
-  async navigate(): Promise<void> {
-    // TODO: v1 smart switch
-    //await this.page.goto('/v1/checkout-complete');
-    await this.page.goto('/checkout-complete.html');
-  }
-
-  async expectVisible(): Promise<void> {
-    await expect(this.page.getByText('Checkout: Complete')).toBeVisible();
   }
 
   async backHome(): Promise<void> {

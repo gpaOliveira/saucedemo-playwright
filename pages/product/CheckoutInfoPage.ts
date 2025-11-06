@@ -1,3 +1,4 @@
+import { BasePage, PageIdentifier } from '@pages/base/BasePage';
 import {
   Page,
   BrowserContext,
@@ -6,7 +7,7 @@ import {
   test as baseTest,
 } from '@playwright/test';
 
-export class CheckoutInformationPage {
+export class CheckoutInformationPage extends BasePage {
   readonly firstName: Locator;
   readonly lastName: Locator;
   readonly postalCode: Locator;
@@ -19,6 +20,7 @@ export class CheckoutInformationPage {
     readonly page: Page,
     readonly context: BrowserContext,
   ) {
+    super(page, context, PageIdentifier.CheckoutInfo);
     this.firstName = this.page.getByTestId('firstName');
     this.lastName = this.page.getByTestId('lastName');
     this.postalCode = this.page.getByTestId('postalCode');
@@ -26,18 +28,6 @@ export class CheckoutInformationPage {
     this.continueButton = this.page.getByTestId('continue');
     this.error = this.page.getByTestId('error');
     this.errorButton = this.page.getByTestId('error-button');
-  }
-
-  async navigate(): Promise<void> {
-    // TODO: v1 smart switch
-    //await this.page.goto('/v1/checkout-step-one');
-    await this.page.goto('/checkout-step-one.html');
-  }
-
-  async expectVisible(): Promise<void> {
-    await expect(
-      this.page.getByText('Checkout: Your Information'),
-    ).toBeVisible();
   }
 
   async cancel(): Promise<void> {

@@ -6,8 +6,9 @@ import {
   test as baseTest,
 } from '@playwright/test';
 import { ProductItemPage } from './ProductItemPage';
+import { BasePage, PageIdentifier } from '@pages/base/BasePage';
 
-export class CheckoutOverviewPage {
+export class CheckoutOverviewPage extends BasePage {
   readonly taxRate = 0.08;
   readonly subtotal: Locator;
   readonly tax: Locator;
@@ -20,22 +21,13 @@ export class CheckoutOverviewPage {
     readonly page: Page,
     readonly context: BrowserContext,
   ) {
+    super(page, context, PageIdentifier.CheckoutOverview);
     this.subtotal = this.page.getByTestId('subtotal-label');
     this.tax = this.page.getByTestId('tax-label');
     this.total = this.page.getByTestId('total-label');
     this.cancelButton = this.page.getByTestId('cancel');
     this.finishButton = this.page.getByTestId('finish');
     this.productItemPage = new ProductItemPage(page, context);
-  }
-
-  async navigate(): Promise<void> {
-    // TODO: v1 smart switch
-    //await this.page.goto('/v1/checkout-step-two');
-    await this.page.goto('/checkout-step-two.html');
-  }
-
-  async expectVisible(): Promise<void> {
-    await expect(this.page.getByText('Checkout: Overview')).toBeVisible();
   }
 
   async expectMathOK(): Promise<void> {

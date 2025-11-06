@@ -89,7 +89,7 @@ Moreover, the playwright HTML report is uploaded to a Github Page so one can ope
 We use [dotenv](https://www.npmjs.com/package/dotenv) to load a `.env` file on root folder with the following keys:
 
 ```bash
-SAUCEDEMO_BASE_URL="https://www.saucedemo.com/v1"
+SAUCEDEMO_BASE_URL="https://www.saucedemo.com"
 ```
 
 These are also configured on Github project, so make sure to add there extra keys if you need them.
@@ -118,6 +118,8 @@ Under [pages](./pages/) we can find some helper objects and page objects, as fol
 
 - [AuthenticateData](./pages/authentication/AuthenticateData.ts): interfaces with a JSON file to give us access to information about test users (username, password, error message when login fails, and the playwright session filename)
 - [AuthenticatePage\*](./pages/authentication/AuthenticatePage.ts): a page object to login on the Saucedemo environment, isolating such methods and logic from all other page-objects. Use it in tests as a fixture with `authenticatePage`
+- [BasePageData](./pages/base/BasePageData.ts): interfaces with titles/urls per page, allowing us to switch between Saucedmo v0 and v1 depending if `v1` appears on the SAUCEDEMO_BASE_URL (default to v0)
+- [BasePage](./pages/base/BasePage.ts): a page object with common methods to all others (e.g to navigate and to check titles), using the data from `BasePageData`
 - [StepController\*](./pages/common/StepController.ts): allow us to have a wrapper to run some code before/after each test step - a feature missing in Playwright (see [more above](#test-steps)). Use it in tests as a fixture with `step`
 - [TestInfoPage](./pages/common/TestInfoPage.ts): allow our step wrapper mentioned before to add information on the Playwright HTML report
 - [ProductsPage\*](./pages/ProductsPage.ts): a page object to interact with product listing. Use it in tests as a fixture with `productsPage`
@@ -131,6 +133,5 @@ All those helper marker with `*` objects are accessible as [fixtures](https://pl
 
 ## Future ToDos
 
-- Smart v1 vs v0 switch: sometimes Saucedemo URL for v1 is not working so we have to be flexible here. Luckily the selectors are all the same :)
 - [WebVitals](https://web.dev/articles/vitals) integration with Playwright
 - [DevContainers](https://docs.github.com/en/codespaces/setting-up-your-project-for-codespaces/adding-a-dev-container-configuration/introduction-to-dev-containers) to run tests

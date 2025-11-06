@@ -11,26 +11,18 @@ import {
   SortingFunctions,
 } from './ProductModels';
 import { ProductItemPage } from './ProductItemPage';
+import { BasePage, PageIdentifier } from '@pages/base/BasePage';
 
-export class ProductsPage {
+export class ProductsPage extends BasePage {
   readonly sortContainer: Locator;
   public productItemPage: ProductItemPage;
   constructor(
     readonly page: Page,
     readonly context: BrowserContext,
   ) {
+    super(page, context, PageIdentifier.Products);
     this.sortContainer = this.page.locator('.product_sort_container');
     this.productItemPage = new ProductItemPage(page, context);
-  }
-
-  async navigate(): Promise<void> {
-    // TODO: v1 smart switch
-    //await this.page.goto('/v1/inventory');
-    await this.page.goto('/inventory.html');
-  }
-
-  async expectVisible(): Promise<void> {
-    await expect(this.page.getByText('Products')).toBeVisible();
   }
 
   async selectSorting(option: SortingOptionsType) {
