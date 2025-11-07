@@ -13,6 +13,8 @@
     "paths": {
       "@common/*": ["./pages/common/*"],
       "@authentication/*": ["./pages/authentication/*"],
+      "@product/*": ["./pages/product/*"],
+      "@base/*": ["./pages/base/*"],
       "@pages/*": ["./pages/*"]
     }
   },

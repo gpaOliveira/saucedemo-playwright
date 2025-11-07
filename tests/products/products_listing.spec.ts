@@ -1,6 +1,6 @@
 import test from '../base';
-import azJson from './products_sorted_az.json';
-import { SortingOptions } from '@pages/ProductsPage';
+import azJson from '../data/products_sorted_az.json';
+import { SortingOptions } from '@product/ProductModels';
 
 test.describe('Products tests', { tag: ['@Product', '@PageObject'] }, () => {
   test.describe.configure({ mode: 'parallel' });
@@ -14,7 +14,7 @@ test.describe('Products tests', { tag: ['@Product', '@PageObject'] }, () => {
     await step.in('should be correct', async () => {
       await productsPage.expectSorting(SortingOptions.AZ);
       for (const [index, item] of azJson.entries()) {
-        await productsPage.expectProductAt(index, {
+        await productsPage.productItemPage.expectProductAt(index, {
           title: item.title,
           price: item.price,
         });
